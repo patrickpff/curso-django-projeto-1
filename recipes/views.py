@@ -5,7 +5,10 @@ from django.http import Http404
 from .models import Recipe
 
 def home (request):
-    recipes = Recipe.objects.filter(is_published=True).order_by('-id')
+    recipes = Recipe.objects.filter(
+        is_published=True
+    ).order_by('-id')
+
     return render(request=request, template_name='recipes/pages/home.html', context={
         'recipes': recipes,
     })
@@ -24,7 +27,13 @@ def category (request, id):
     })
 
 def recipe (request, id):
+    recipe = get_object_or_404(
+        Recipe,
+        pk=id,
+        is_published=True,
+    )
+
     return render(request=request, template_name='recipes/pages/recipe-view.html', context={
-        'recipe': make_recipe(),
+        'recipe': recipe,
         'is_detail_page': True,
     })

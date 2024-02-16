@@ -1,11 +1,9 @@
-from django.test import TestCase
 from django.urls import resolve, reverse
 from recipes import views
-from recipes.models import Category, Recipe, User
+from .test_recipe_base import RecipeTestBase
 
 
-class RecipeViewTest(TestCase):
-
+class RecipeViewTest(RecipeTestBase):
     # Home
     def test_recipe_home_view_function_is_correct(self):
         view = resolve(reverse('recipe:list'))
@@ -26,46 +24,21 @@ class RecipeViewTest(TestCase):
             response.content.decode('UTF-8')
         )
 
+    def test_recipe_home_shows_no_recipes_found_if_no_recipes_fail(self):
+        response = self.client.get(reverse('recipe:list'))
+        self.assertIn(
+            'No recipes found here',
+            response.content.decode('UTF-8')
+        )
+        self.fail('A recipe was found, check your code.')
+
     def test_recipe_home_template_loads_recipes(self):
-        category = Category.objects.create(name='Dessert')
-        author = User.objects.create(
-            first_name="John",
-            last_name="Doe",
-            username="johndoe",
-            password="johndoe123",
-            email="johndoe@email.com",
-        )
-        recipes = Recipe.objects.create(
-            title='Pudim',
-            description='Lorem ipsum dolor sit amet, consectetur '
-            'adipiscing elit. Nulla ac nulla sit amet felis vestibulum'
-            ' porta. Sed rhoncus nunc vel lobortis viverra.',
-            slug='recipe-slug',
-            preparation_time=10,
-            preparation_time_unit='Minutes',
-            servings=5,
-            servings_unit='Portions',
-            preparation_steps='Lorem ipsum dolor sit amet, consectetur '
-            'adipiscing elit. Nulla ac nulla sit amet felis vestibulum'
-            ' porta. Sed rhoncus nunc vel lobortis viverra. In hac '
-            'habitasse platea dictumst. Vivamus aliquet, ligula ac '
-            'faucibus sodales, ipsum orci auctor erat, vel aliquet est '
-            'nisi sed orci. Maecenas mattis, nunc ac vulputate pharetra, '
-            'tortor metus blandit neque, quis convallis massa sem at '
-            'tortor. Proin pulvinar commodo aliquam. Quisque sit amet'
-            ' euismod quam, quis interdum est. Integer dictum justo '
-            'tristique ex varius, nec euismod quam egestas.'
-            ' Sed eget consectetur ligula.',
-            preparation_steps_is_html=False,
-            is_published=True,
-            cover=None,
-            category=category,
-            author=author,
-        )
+        self.make_recipe()
         response = self.client.get(reverse('recipe:list'))
         content = response.content.decode('UTF-8')
         response_context_recipes = response.context['recipes']
         
+        # Check if the created recipe is in the page
         self.assertIn('Pudim', content)
         self.assertIn('10 Minutes', content)
         self.assertIn('5 Portions', content)

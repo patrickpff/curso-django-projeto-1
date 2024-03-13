@@ -1,6 +1,6 @@
 from django.test import TestCase
 from recipes.models import Category, Recipe, User
-
+from unittest import skip
 
 class RecipeTestBase(TestCase):
     def setUp(self) -> None:
